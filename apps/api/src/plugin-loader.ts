@@ -5,8 +5,12 @@ import { eq } from 'drizzle-orm';
 import { pluginRegistry } from '@oias/db';
 
 /** Map of plugin keys to their module paths */
-const PLUGIN_MAP: Record<string, () => Promise<{ default: OIASPlugin }>> = {
+const PLUGIN_MAP: Record<
+  string,
+  () => Promise<{ default: OIASPlugin; bindApp?: (app: FastifyInstance) => void }>
+> = {
   due_dates: () => import('./plugins/due-dates/index.js'),
+  ai_triage: () => import('./plugins/ai-triage/index.js'),
   // sla_policy: () => import('./plugins/sla-policy/index.js'),
   // email_intake: () => import('./plugins/email-intake/index.js'),
 };
@@ -25,7 +29,11 @@ export async function loadPlugins(app: FastifyInstance, db: Database) {
     }
 
     try {
-      const { default: plugin } = await loader();
+      const mod = await loader();
+      const plugin = mod.default;
+
+      // Give plugins that need access to `app` from event handlers a chance to capture it.
+      mod.bindApp?.(app);
 
       // Register routes
       if (plugin.routes) {

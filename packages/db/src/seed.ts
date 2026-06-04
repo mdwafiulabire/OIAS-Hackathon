@@ -228,6 +228,31 @@ async function main() {
 
   console.log('  tickets: 5 (new×1, assigned×1, in_progress×1, resolved×1, closed×1)');
 
+  // 5. Plugins enabled for the demo org (Reasoning Agents track demo).
+  await db
+    .insert(schema.pluginRegistry)
+    .values([
+      {
+        orgId: ORG_ID,
+        pluginKey: 'ai_triage',
+        isEnabled: true,
+        config: {},
+        enabledAt: new Date(),
+        enabledBy: USER_IDS.admin,
+      },
+      {
+        orgId: ORG_ID,
+        pluginKey: 'due_dates',
+        isEnabled: true,
+        config: {},
+        enabledAt: new Date(),
+        enabledBy: USER_IDS.admin,
+      },
+    ])
+    .onConflictDoNothing();
+
+  console.log('  plugins enabled: ai_triage, due_dates');
+
   await client.end();
   console.log('Seed complete.');
 }

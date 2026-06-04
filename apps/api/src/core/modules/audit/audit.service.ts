@@ -4,7 +4,8 @@ import type { AuditAction } from '@oias/types';
 
 interface AuditLogEntry {
   orgId: string;
-  actorId: string;
+  /** Optional: null when the actor is the system (e.g. async AI worker on behalf of an event). */
+  actorId?: string;
   action: AuditAction;
   entityType: string;
   entityId: string;

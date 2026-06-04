@@ -14,6 +14,7 @@ export const AUDIT_ACTIONS = [
   'plugin.enabled',
   'plugin.disabled',
   'workflow.transition',
+  'ai.suggestion_created',
   'ai.suggestion_accepted',
   'ai.suggestion_dismissed',
 ] as const;
