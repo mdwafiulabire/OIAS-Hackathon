@@ -16,9 +16,17 @@
  * field there is informational; actual auth goes through Better Auth's `account` table.
  */
 
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import * as schema from './schema/index.js';
+
+// Load .env from monorepo root (Node 22+ built-in, no dotenv dep).
+const envPath = resolve(import.meta.dirname, '../../../.env');
+if (existsSync(envPath)) {
+  process.loadEnvFile(envPath);
+}
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
