@@ -67,86 +67,90 @@ const plugin: OIASPlugin = {
   version: '0.1.0',
 
   routes: (app: FastifyInstance) => {
-    app.addHook('onRequest', authMiddleware);
-
-    // GET /api/v1/plugins/ai_triage/health — proves Foundry connectivity for the demo.
+    // PUBLIC — GET /api/v1/plugins/ai_triage/health
+    // Proves Foundry connectivity for the demo without requiring a session.
     app.get('/health', async (request) => {
       const result = await foundryPing();
       return apiResponse(request, result);
     });
 
-    // GET /api/v1/plugins/ai_triage/ticket/:ticketId — most recent suggestion for a ticket.
-    app.get('/ticket/:ticketId', async (request) => {
-      const { ticketId } = request.params as { ticketId: string };
-      const rows = await app.db
-        .select()
-        .from(aiSuggestions)
-        .where(and(eq(aiSuggestions.ticketId, ticketId), eq(aiSuggestions.orgId, request.orgId)));
-      return apiResponse(request, rows);
-    });
+    // AUTHENTICATED scope — sub-register so the auth hook does not leak to /health.
+    app.register(async (secured) => {
+      secured.addHook('onRequest', authMiddleware);
 
-    // POST /api/v1/plugins/ai_triage/:id/accept — mark suggestion accepted.
-    app.post('/:id/accept', {
-      preHandler: [requireRole('admin', 'manager', 'agent')],
-      handler: async (request) => {
-        const { id } = request.params as { id: string };
-        const [updated] = await app.db
-          .update(aiSuggestions)
-          .set({ status: 'accepted', reviewedBy: request.userId, reviewedAt: new Date() })
-          .where(and(eq(aiSuggestions.id, id), eq(aiSuggestions.orgId, request.orgId)))
-          .returning();
-        if (updated) {
-          await auditLog(app.db, {
-            orgId: request.orgId,
-            actorId: request.userId,
-            action: 'ai.suggestion_accepted',
-            entityType: 'ai_suggestion',
-            entityId: id,
-            payload: { suggestionType: updated.suggestionType },
-            ipAddress: request.ip,
-          });
-          app.eventBus.emit('ai.suggestion_accepted', {
-            orgId: request.orgId,
-            entityType: 'ai_suggestion',
-            entityId: id,
-            actorId: request.userId,
-            timestamp: new Date(),
-          });
-        }
-        return apiResponse(request, updated ?? null);
-      },
-    });
+      // GET /ticket/:ticketId — suggestions for a ticket.
+      secured.get('/ticket/:ticketId', async (request) => {
+        const { ticketId } = request.params as { ticketId: string };
+        const rows = await app.db
+          .select()
+          .from(aiSuggestions)
+          .where(and(eq(aiSuggestions.ticketId, ticketId), eq(aiSuggestions.orgId, request.orgId)));
+        return apiResponse(request, rows);
+      });
 
-    // POST /api/v1/plugins/ai_triage/:id/dismiss — mark suggestion dismissed.
-    app.post('/:id/dismiss', {
-      preHandler: [requireRole('admin', 'manager', 'agent')],
-      handler: async (request) => {
-        const { id } = request.params as { id: string };
-        const [updated] = await app.db
-          .update(aiSuggestions)
-          .set({ status: 'dismissed', reviewedBy: request.userId, reviewedAt: new Date() })
-          .where(and(eq(aiSuggestions.id, id), eq(aiSuggestions.orgId, request.orgId)))
-          .returning();
-        if (updated) {
-          await auditLog(app.db, {
-            orgId: request.orgId,
-            actorId: request.userId,
-            action: 'ai.suggestion_dismissed',
-            entityType: 'ai_suggestion',
-            entityId: id,
-            payload: { suggestionType: updated.suggestionType },
-            ipAddress: request.ip,
-          });
-          app.eventBus.emit('ai.suggestion_dismissed', {
-            orgId: request.orgId,
-            entityType: 'ai_suggestion',
-            entityId: id,
-            actorId: request.userId,
-            timestamp: new Date(),
-          });
-        }
-        return apiResponse(request, updated ?? null);
-      },
+      // POST /:id/accept — mark suggestion accepted.
+      secured.post('/:id/accept', {
+        preHandler: [requireRole('admin', 'manager', 'agent')],
+        handler: async (request) => {
+          const { id } = request.params as { id: string };
+          const [updated] = await app.db
+            .update(aiSuggestions)
+            .set({ status: 'accepted', reviewedBy: request.userId, reviewedAt: new Date() })
+            .where(and(eq(aiSuggestions.id, id), eq(aiSuggestions.orgId, request.orgId)))
+            .returning();
+          if (updated) {
+            await auditLog(app.db, {
+              orgId: request.orgId,
+              actorId: request.userId,
+              action: 'ai.suggestion_accepted',
+              entityType: 'ai_suggestion',
+              entityId: id,
+              payload: { suggestionType: updated.suggestionType },
+              ipAddress: request.ip,
+            });
+            app.eventBus.emit('ai.suggestion_accepted', {
+              orgId: request.orgId,
+              entityType: 'ai_suggestion',
+              entityId: id,
+              actorId: request.userId,
+              timestamp: new Date(),
+            });
+          }
+          return apiResponse(request, updated ?? null);
+        },
+      });
+
+      // POST /:id/dismiss — mark suggestion dismissed.
+      secured.post('/:id/dismiss', {
+        preHandler: [requireRole('admin', 'manager', 'agent')],
+        handler: async (request) => {
+          const { id } = request.params as { id: string };
+          const [updated] = await app.db
+            .update(aiSuggestions)
+            .set({ status: 'dismissed', reviewedBy: request.userId, reviewedAt: new Date() })
+            .where(and(eq(aiSuggestions.id, id), eq(aiSuggestions.orgId, request.orgId)))
+            .returning();
+          if (updated) {
+            await auditLog(app.db, {
+              orgId: request.orgId,
+              actorId: request.userId,
+              action: 'ai.suggestion_dismissed',
+              entityType: 'ai_suggestion',
+              entityId: id,
+              payload: { suggestionType: updated.suggestionType },
+              ipAddress: request.ip,
+            });
+            app.eventBus.emit('ai.suggestion_dismissed', {
+              orgId: request.orgId,
+              entityType: 'ai_suggestion',
+              entityId: id,
+              actorId: request.userId,
+              timestamp: new Date(),
+            });
+          }
+          return apiResponse(request, updated ?? null);
+        },
+      });
     });
   },
 
