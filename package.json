@@ -1,0 +1,22 @@
+{
+  "name": "oias",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "db:generate": "pnpm --filter @oias/db generate",
+    "db:migrate": "pnpm --filter @oias/db migrate",
+    "db:push": "pnpm --filter @oias/db push",
+    "db:studio": "pnpm --filter @oias/db studio",
+    "db:seed": "pnpm --filter @oias/db seed"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.1"
+  }
+}

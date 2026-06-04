@@ -1,0 +1,38 @@
+# Dependencies (reinstalled in Docker)
+node_modules
+**/node_modules
+
+# Git
+.git
+.gitignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist
+**/dist
+.next
+**/.next
+.turbo
+**/.turbo
+
+# Test & coverage
+coverage
+**/coverage
+
+# Swarm / Claude tooling
+.swarm
+.claude
+.claude-flow
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS artifacts
+.DS_Store
+Thumbs.db

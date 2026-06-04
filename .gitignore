@@ -1,0 +1,40 @@
+node_modules/
+dist/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+
+# Docker volumes
+postgres-data/
+redis-data/
+
+# Claude Code & agent tooling (local to dev)
+.claude/settings.local.json
+.claude/agents/
+.claude/commands/
+.claude/helpers/
+.claude/skills/
+.claude/statusline.mjs
+.claude/statusline.sh
+.claude-flow/
+.swarm/
+.mcp.json
+
+# AI prompt-cache / runtime artifacts
+*.log
