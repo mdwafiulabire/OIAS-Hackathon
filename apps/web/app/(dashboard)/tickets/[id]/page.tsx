@@ -363,7 +363,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" className="shrink-0">
                   <MoreVertical className="h-4 w-4" />
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">Actions for ticket {t.title}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">

@@ -325,7 +325,7 @@ export default function TicketsPage() {
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-7 w-7">
                               <MoreHorizontalIcon className="h-4 w-4" />
-                              <span className="sr-only">Actions</span>
+                              <span className="sr-only">Actions for {ticket.title}</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
