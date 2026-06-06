@@ -17,27 +17,27 @@ Modular operations control platform for SMEs: tracked, auditable, AI-assisted ti
 
 ## Quickstart
 
+### Option A — one command (recommended)
+
 ```bash
-# 1. Clone and enter the repo
 git clone <repo-url> oias && cd oias
+cp .env.example .env       # fill AZURE_AI_FOUNDRY_* values
+docker compose up --build
+```
 
-# 2. Copy environment config
+Brings up Postgres, Redis, runs migrations + seed, then starts the API (`:3001`) and web (`:3000`). Open [http://localhost:3000](http://localhost:3000) once `api` reports healthy.
+
+### Option B — local dev with hot reload
+
+```bash
+git clone <repo-url> oias && cd oias
 cp .env.example .env
-# Edit .env — fill in ANTHROPIC_API_KEY and any other required values
-
-# 3. Start infrastructure (Postgres + Redis)
 docker compose up postgres redis -d
-
-# 4. Install dependencies, run migrations, seed demo data
 pnpm install
 pnpm db:migrate
 pnpm db:seed
-
-# 5. Start dev servers (API on :3001, web on :3000)
 pnpm dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000).
 
 ---
 

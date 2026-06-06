@@ -27,6 +27,23 @@ services:
       timeout: 5s
       retries: 5
 
+  # One-shot: apply Drizzle migrations + seed demo data, then exit.
+  # API waits for this to complete successfully before booting.
+  db-init:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: builder
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://oias:oias_dev@postgres:5432/oias
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "pnpm --filter @oias/db migrate && pnpm --filter @oias/db seed"
+    restart: "no"
+
   api:
     build:
       context: .
@@ -43,6 +60,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     healthcheck:
       test:
         - "CMD"
