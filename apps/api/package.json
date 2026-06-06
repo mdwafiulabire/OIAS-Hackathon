@@ -7,6 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "bootstrap": "tsx src/scripts/bootstrap.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "lint": "echo 'no lint configured yet'"
