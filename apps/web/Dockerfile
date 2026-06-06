@@ -40,9 +40,8 @@ COPY packages/config/package.json ./packages/config/package.json
 
 RUN pnpm install --frozen-lockfile --prod
 
-# Copy Next.js build output and public assets
+# Copy Next.js build output. (No public/ folder in this project — skip.)
 COPY --from=builder /app/apps/web/.next ./apps/web/.next
-COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/next.config.ts ./apps/web/next.config.ts
 
 # Copy shared packages needed at runtime
