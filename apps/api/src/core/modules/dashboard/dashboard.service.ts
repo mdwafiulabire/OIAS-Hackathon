@@ -54,7 +54,9 @@ export async function getDashboardStats(db: Database, orgId: string) {
 }
 
 export async function getAgentBacklog(db: Database, orgId: string) {
-  const staleThreshold = new Date(Date.now() - 48 * 60 * 60 * 1000);
+  // Raw sql`` interpolation doesn't auto-convert Date → ISO the way drizzle's
+  // lt() operator does; pass an ISO string and cast at the SQL layer.
+  const staleThresholdIso = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
 
   const rows = await db
     .select({
@@ -62,7 +64,7 @@ export async function getAgentBacklog(db: Database, orgId: string) {
       assigneeName: users.fullName,
       openTickets: count(),
       highPriority: sql<number>`count(*) filter (where ${tickets.priority} in ('high', 'urgent'))`,
-      overdue: sql<number>`count(*) filter (where ${tickets.updatedAt} < ${staleThreshold})`,
+      overdue: sql<number>`count(*) filter (where ${tickets.updatedAt} < ${staleThresholdIso}::timestamptz)`,
     })
     .from(tickets)
     .innerJoin(users, eq(users.id, tickets.assigneeId))
